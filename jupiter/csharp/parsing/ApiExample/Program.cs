@@ -7,13 +7,6 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-/*
- * On problems with PostAsJsonAsync try
- * Type the following command into Tools > Library Package Manager > Package Manager Console:
-    Install-Package Microsoft.AspNet.WebApi.Client -Version 4.0.20710
-    see: https://docs.microsoft.com/en-us/aspnet/web-api/overview/advanced/calling-a-web-api-from-a-net-client
- */
-
 namespace ConsoleApp1
 {
     public class Credentials
@@ -94,9 +87,15 @@ namespace ConsoleApp1
         public string fuel { get; set; }
     }
 
-    public class QueryParam
+    public class SinceQueryParam
     {
         public string since { get; set; }
+        public string access_token { get; set; }
+    }
+
+    public class CustomQueryParam
+    {
+        public string[] customIds { get; set; }
         public string access_token { get; set; }
     }
 	
@@ -107,6 +106,69 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             RunAsync().GetAwaiter().GetResult();
+        }
+
+        static void writeMessage(Message message)
+        {
+            Console.WriteLine("--- Message ---");
+            Console.WriteLine($"Unique ID: {message.unqid}");
+            Console.WriteLine($"Custom ID (only for messages pushed via API): {message.customId}");
+            Console.WriteLine($"E-mail date: {message.date}");
+            Console.WriteLine($"E-mail sender: {message.sender}");
+            Console.WriteLine($"E-mail subject: {message.subject}");
+            Console.WriteLine($"E-mail receiver: {message.receiver}");
+        }
+
+        static void writeTonnage(Tonnage tonnage)
+        {
+            Console.WriteLine("- Ship position -");
+            Console.WriteLine($"vesselId: {tonnage.vesselId}");
+            Console.WriteLine($"vesselName: {tonnage.vesselName}");
+            Console.WriteLine($"openDateStart: {tonnage.openDateStart}");
+            Console.WriteLine($"openDateEnd: {tonnage.openDateEnd}");
+            Console.WriteLine($"openPortName: {tonnage.openPortName}");
+            Console.WriteLine($"openPortId: {tonnage.openPortId}");
+            Console.WriteLine($"openRegionName: {tonnage.openRegionName}");
+            Console.WriteLine($"openRegionId: {tonnage.openRegionId}");
+            Console.WriteLine($"openCountryName: {tonnage.openCountryName}");
+            Console.WriteLine($"openCountryId: {tonnage.openCountryId}");
+            Console.WriteLine($"isBallast: {tonnage.isBallast}");
+            Console.WriteLine($"status: {tonnage.status}");
+            Console.WriteLine($"lastCargoes: {tonnage.lastCargoes}");
+            Console.WriteLine($"sourceId: {tonnage.sourceId}");
+            Console.WriteLine($"attachment: {tonnage.attachment}");
+            Console.WriteLine($"isEta: {tonnage.isEta}");
+            Console.WriteLine($"spot: {tonnage.attachment}");
+            Console.WriteLine($"color: {tonnage.color}");
+            Console.WriteLine($"colorNote: {tonnage.colorNote}");
+        }
+
+        static void writeEmailVesselSpec(EmailVesselSpec emailVesselSpec)
+        {
+            Console.WriteLine("- Ship specifications -");
+            Console.WriteLine($"vesselId: {emailVesselSpec.vesselId}");
+            Console.WriteLine($"vesselName: {emailVesselSpec.vesselName}");
+            Console.WriteLine($"dwt: {emailVesselSpec.dwt}");
+            Console.WriteLine($"dwtSummer: {emailVesselSpec.dwtSummer}");
+            Console.WriteLine($"dwtWinter: {emailVesselSpec.dwtWinter}");
+            Console.WriteLine($"dwtTropical: {emailVesselSpec.dwtTropical}");
+            Console.WriteLine($"dwtTropicalFresh: {emailVesselSpec.dwtTropicalFresh}");
+            Console.WriteLine($"dwtFresh: {emailVesselSpec.dwtFresh}");
+            Console.WriteLine($"buildYear: {emailVesselSpec.buildYear}");
+        }
+
+        static void writeSpeedConsumptions(SpeedConsumptions speedAndConsumption)
+        {
+            Console.WriteLine("- Speed and Consumption -");
+            Console.WriteLine($"speed: {speedAndConsumption.speed}");
+            Console.WriteLine($"type: {speedAndConsumption.type}");
+        }
+
+        static void writeConsumption(Consumption consumption)
+        {
+            Console.WriteLine("- Consumption -");
+            Console.WriteLine($"speed: {consumption.quantity}");
+            Console.WriteLine($"type: {consumption.fuel}");
         }
 
         static async Task<AccessDetails> LoginAsync(Credentials credentials)
@@ -122,12 +184,12 @@ namespace ConsoleApp1
             return accessDetails;
         }
 
-        static async Task GetMessagesAsync(AccessDetails accessDetails)
+        static async Task GetMessagesSinceAsync(AccessDetails accessDetails)
         {
             Messages messages = null;
             String sinceDate = DateTime.Now.ToString("yyyy-MM-dd");
             Console.WriteLine($"Getting parsing results since {sinceDate}");
-            QueryParam queryParam = new QueryParam
+            SinceQueryParam queryParam = new SinceQueryParam
             {
                 since = sinceDate,
                 access_token = accessDetails.id
@@ -141,58 +203,20 @@ namespace ConsoleApp1
                 Console.WriteLine($"Number of messages found: {messages.results.Length}");
                 foreach (Message message in messages.results)
                 {
-                    Console.WriteLine("--- Message ---");
-                    Console.WriteLine($"Unique ID: {message.unqid}");
-                    Console.WriteLine($"Custom ID (only for messages pushed via API): {message.customId}");
-                    Console.WriteLine($"E-mail date: {message.date}");
-                    Console.WriteLine($"E-mail sender: {message.sender}");
-                    Console.WriteLine($"E-mail subject: {message.subject}");
-                    Console.WriteLine($"E-mail receiver: {message.receiver}");
+                    writeMessage(message);
                     foreach (Tonnage tonnage in message.tonnage)
                     {
-                        Console.WriteLine("- Ship position -");
-                        Console.WriteLine($"vesselId: {tonnage.vesselId}");
-                        Console.WriteLine($"vesselName: {tonnage.vesselName}");
-                        Console.WriteLine($"openDateStart: {tonnage.openDateStart}");
-                        Console.WriteLine($"openDateEnd: {tonnage.openDateEnd}");
-                        Console.WriteLine($"openPortName: {tonnage.openPortName}");
-                        Console.WriteLine($"openPortId: {tonnage.openPortId}");
-                        Console.WriteLine($"openRegionName: {tonnage.openRegionName}");
-                        Console.WriteLine($"openRegionId: {tonnage.openRegionId}");
-                        Console.WriteLine($"openCountryName: {tonnage.openCountryName}");
-                        Console.WriteLine($"openCountryId: {tonnage.openCountryId}");
-                        Console.WriteLine($"isBallast: {tonnage.isBallast}");
-                        Console.WriteLine($"status: {tonnage.status}");
-                        Console.WriteLine($"lastCargoes: {tonnage.lastCargoes}");
-                        Console.WriteLine($"sourceId: {tonnage.sourceId}");
-                        Console.WriteLine($"attachment: {tonnage.attachment}");
-                        Console.WriteLine($"isEta: {tonnage.isEta}");
-                        Console.WriteLine($"spot: {tonnage.attachment}");
-                        Console.WriteLine($"color: {tonnage.color}");
-                        Console.WriteLine($"colorNote: {tonnage.colorNote}");
+                        writeTonnage(tonnage);
                     }
                     foreach (EmailVesselSpec emailVesselSpec in message.emailVesselSpec)
                     {
-                        Console.WriteLine("- Ship specifications -");
-                        Console.WriteLine($"vesselId: {emailVesselSpec.vesselId}");
-                        Console.WriteLine($"vesselName: {emailVesselSpec.vesselName}");
-                        Console.WriteLine($"dwt: {emailVesselSpec.dwt}");
-                        Console.WriteLine($"dwtSummer: {emailVesselSpec.dwtSummer}");
-                        Console.WriteLine($"dwtWinter: {emailVesselSpec.dwtWinter}");
-                        Console.WriteLine($"dwtTropical: {emailVesselSpec.dwtTropical}");
-                        Console.WriteLine($"dwtTropicalFresh: {emailVesselSpec.dwtTropicalFresh}");
-                        Console.WriteLine($"dwtFresh: {emailVesselSpec.dwtFresh}");
-                        Console.WriteLine($"buildYear: {emailVesselSpec.buildYear}");
+                        writeEmailVesselSpec(emailVesselSpec);
                         foreach (SpeedConsumptions speedAndConsumption in emailVesselSpec.speedAndConsumption)
                         {
-                            Console.WriteLine("- Speed and Consumption -");
-                            Console.WriteLine($"speed: {speedAndConsumption.speed}");
-                            Console.WriteLine($"type: {speedAndConsumption.type}");
+                            writeSpeedConsumptions(speedAndConsumption);
                             foreach (Consumption consumption in speedAndConsumption.consumption)
                             {
-                                Console.WriteLine("- Consumption -");
-                                Console.WriteLine($"speed: {consumption.quantity}");
-                                Console.WriteLine($"type: {consumption.fuel}");
+                                writeConsumption(consumption);
                             }
                         }
                     }
@@ -202,8 +226,38 @@ namespace ConsoleApp1
                 Console.WriteLine(response.StatusCode);
             }
             return;
-        }	
-		
+        }
+
+
+        static async Task GetMessagesCustomIdsAsync(AccessDetails accessDetails)
+        {
+            Messages messages = null;
+            string[] customIds = { "ID1", "ID2" };
+            Console.WriteLine($"Getting parsing results for example message IDs");
+            CustomQueryParam queryParam = new CustomQueryParam
+            {
+                customIds = customIds,
+                access_token = accessDetails.id
+            };
+            // don't pass access token via URI
+            HttpResponseMessage response = await client.PostAsJsonAsync(
+                "api/Messages/query", queryParam);
+                if (response.IsSuccessStatusCode)
+                {
+                    messages = await response.Content.ReadAsAsync<Messages>();
+                    Console.WriteLine($"Number of messages found: {messages.results.Length}");
+                    foreach (Message message in messages.results)
+                    {
+                        writeMessage(message);
+                    }
+                }
+            else
+            {
+                Console.WriteLine(response.StatusCode);
+            }
+            return;
+        }
+
         static async Task RunAsync()
         {
             client.BaseAddress = new Uri("https://jupiter.shipamax.com/");
@@ -215,13 +269,14 @@ namespace ConsoleApp1
             {
                 Credentials credentials = new Credentials
                 {
-                    email = "username",
-                    password = "password"
+                    email = "YOUR-EMAIL",
+                    password = "YOUR-PASSWORD"
                 };
 
                 AccessDetails accessDetails = await LoginAsync(credentials);
                 Console.WriteLine($"Logged in and received access token: {accessDetails.id}");
-                await GetMessagesAsync(accessDetails);
+                await GetMessagesSinceAsync(accessDetails);
+                await GetMessagesCustomIdsAsync(accessDetails);
             }
             catch (Exception e)
             {
