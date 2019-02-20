@@ -1,1 +1,0 @@
-Shipamax API Release: Jupiter
