@@ -5,12 +5,11 @@ import uuid
 
 
 HOST = 'http://developer.shipamax-api.com'
-API_VERSION = '012019'
 BILL_OF_LADING_ID = 1
 
 
 def login(host, username, password):
-    url = host + '/api/users/login'
+    url = host + '/api/v1/users/login'
     headers = {
         'Content-Type': 'application/json',
     }
@@ -29,7 +28,7 @@ def login(host, username, password):
 
 
 def logout(host, token):
-    url = host + '/api/users/logout'
+    url = host + '/api/v1/users/logout'
     headers = {
         'Content-Type': 'application/json',
     }
