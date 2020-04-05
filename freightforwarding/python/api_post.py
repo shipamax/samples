@@ -2,42 +2,11 @@ import requests
 import json
 import argparse
 import uuid
+from util import login, logout
 
 
 DEFAULT_HOST = 'https://developer.shipamax-api.com'
 BILL_OF_LADING_ID = 1
-
-
-def login(_host, username, password):
-    """ Log in to API """
-    url = _host + '/api/v1/users/login'
-    headers = {
-        'Content-Type': 'application/json',
-    }
-    payload = {
-        'username': username,
-        'password': password
-    }
-    response = requests.post(url, headers=headers, data=json.dumps(payload))
-    result_json = response.json()
-    if 'id' not in result_json:
-        raise ValueError('Login failed')
-    access_token = result_json['id']
-    return access_token
-
-
-def logout(_host, _token):
-    """ Log out after use """
-    url = _host + '/api/v1/users/logout'
-    headers = {
-        'Content-Type': 'application/json',
-    }
-    params = {
-        'access_token': _token
-    }
-    response = requests.post(url, headers=headers, params=params)
-    if not response.status_code == 204:
-        raise ValueError('Logout failed')
 
 
 def upload(_host, filename, file_type, _token):
@@ -51,7 +20,9 @@ def upload(_host, filename, file_type, _token):
 
     files = {'file': (filename, open(filename, 'rb'))}
     response = requests.post(url, params=data, files=files)
-    print(response)
+    if (response.status_code != 200):
+        raise Exception('Upload failed')    
+    print(response.content)
 
 
 def main():
